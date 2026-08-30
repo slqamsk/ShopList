@@ -71,4 +71,10 @@ class ShoppingListModel {
         $stmt = $this->pdo->prepare("DELETE FROM shopping_list WHERE household_id = ?");
         return $stmt->execute([$householdId]);
     }
+
+    public function getById($id) {
+    $stmt = $this->pdo->prepare("SELECT * FROM shopping_list WHERE id = ?");
+    $stmt->execute([$id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 }
