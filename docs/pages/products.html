@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Продукты</title>
+    <link rel="stylesheet" href="/pr/assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📦 Продукты</h1>
+        <div id="product-list"></div>
+        <hr>
+        <h3>Добавить продукт</h3>
+        <form id="add-form">
+            <input type="text" id="product-name" placeholder="Название" required>
+            <button type="submit">Добавить</button>
+        </form>
+        <div id="error" class="error"></div>
+    </div>
+    <script type="module">
+        import { apiRequest } from '/pr/assets/js/api-client.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const householdId = params.get('household_id');
+        if (!householdId) {
+            document.getElementById('error').textContent = 'Не указано домохозяйство';
+        }
+
+        async function loadProducts() {
+            const data = await apiRequest('products/', 'POST', { household_id: householdId });
+            const list = document.getElementById('product-list');
+            if (data.products.length === 0) {
+                list.innerHTML = '<p>Нет продуктов</p>';
+            } else {
+                list.innerHTML = data.products.map(p =>
+                    `<div>${p.name} <button onclick="deleteProduct(${p.id})">🗑</button></div>`
+                ).join('');
+            }
+        }
+
+        document.getElementById('add-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('product-name').value;
+            try {
+                await apiRequest('products/', 'POST', { household_id: householdId, name });
+                document.getElementById('product-name').value = '';
+                await loadProducts();
+            } catch (err) {
+                document.getElementById('error').textContent = err.message;
+            }
+        });
+
+        window.deleteProduct = async (id) => {
+            if (!confirm('Удалить продукт?')) return;
+            try {
+                await apiRequest(`products/${id}/`, 'DELETE');
+                await loadProducts();
+            } catch (err) {
+                document.getElementById('error').textContent = err.message;
+            }
+        };
+
+        loadProducts();
+    </script>
+</body>
+</html>
