@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход — ShopList</title>
+    <link rel="stylesheet" href="/pr/assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Вход</h1>
+        <form id="login-form">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+        </form>
+        <p>Нет аккаунта? <a href="register.html">Зарегистрироваться</a></p>
+        <div id="error" class="error"></div>
+    </div>
+    <script type="module">
+        import { apiRequest } from '/pr/assets/js/api-client.js';
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                const data = await apiRequest('login/', 'POST', { email, password });
+                if (data.success) {
+                    window.location.href = 'households.html';
+                }
+            } catch (err) {
+                document.getElementById('error').textContent = err.message;
+            }
+        });
+    </script>
+</body>
+</html>
