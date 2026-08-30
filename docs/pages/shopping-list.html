@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список покупок</title>
+    <link rel="stylesheet" href="/pr/assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Список покупок</h1>
+        <div id="shopping-list"></div>
+        <hr>
+        <button id="clear-bought">🗑 Удалить купленные</button>
+        <div id="error" class="error"></div>
+    </div>
+    <script type="module">
+        import { apiRequest } from '/pr/assets/js/api-client.js';
+
+        const params = new URLSearchParams(window.location.search);
+        const householdId = params.get('household_id');
+        if (!householdId) {
+            document.getElementById('error').textContent = 'Не указано домохозяйство';
+        }
+
+        async function loadList() {
+            const data = await apiRequest('shopping-list/', 'POST', { household_id: householdId });
+            const list = document.getElementById('shopping-list');
+            if (data.shopping_list.length === 0) {
+                list.innerHTML = '<p>Список пуст</p>';
+            } else {
+                list.innerHTML = data.shopping_list.map(item => `
+                    <div>
+                        <strong>${item.product_name}</strong>
+                        (${item.quantity || '—'})
+                        <span>${item.status}</span>
+                        <button onclick="updateStatus(${item.id}, 'bought')">✅ Купил</button>
+                        <button onclick="updateStatus(${item.id}, 'not_available')">❌ Нет</button>
+                        <button onclick="deleteItem(${item.id})">🗑</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.updateStatus = async (id, status) => {
+            try {
+                await apiRequest(`shopping-list/${id}/`, 'PUT', { status });
+                await loadList();
+            } catch (err) {
+                document.getElementById('error').textContent = err.message;
+            }
+        };
+
+        window.deleteItem = async (id) => {
+            if (!confirm('Удалить из списка?')) return;
+            try {
+                await apiRequest(`shopping-list/${id}/`, 'DELETE');
+                await loadList();
+            } catch (err) {
+                document.getElementById('error').textContent = err.message;
+            }
+        };
+
+        document.getElementById('clear-bought').addEventListener('click', async () => {
+            if (!confirm('Удалить все купленные товары?')) return;
+            try {
+                await apiRequest('shopping-list/clear-bought/', 'DELETE', { household_id: householdId });
+                await loadList();
+            } catch (err) {
+                document.getElementById('error').textContent = err.message;
+            }
+        });
+
+        loadList();
+    </script>
+</body>
+</html>
