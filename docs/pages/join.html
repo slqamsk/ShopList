@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Присоединиться</title>
+    <link rel="stylesheet" href="/pr/assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Принять приглашение</h1>
+        <form id="join-form">
+            <input type="text" id="code" placeholder="Код приглашения" required>
+            <button type="submit">Присоединиться</button>
+        </form>
+        <div id="error" class="error"></div>
+    </div>
+    <script type="module">
+        import { apiRequest } from '/pr/assets/js/api-client.js';
+
+        // Если код передан в URL
+        const params = new URLSearchParams(window.location.search);
+        const codeParam = params.get('code');
+        if (codeParam) {
+            document.getElementById('code').value = codeParam;
+        }
+
+        document.getElementById('join-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = document.getElementById('code').value;
+            try {
+                const data = await apiRequest('households/join/', 'POST', { code });
+                if (data.success) {
+                    window.location.href = 'households.html';
+                }
+            } catch (err) {
+                document.getElementById('error').textContent = err.message;
+            }
+        });
+    </script>
+</body>
+</html>
