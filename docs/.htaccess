@@ -1,0 +1,9 @@
+<Files ~ "^(\.env|\.ftp-deploy-sync-state\.json)$">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<FilesMatch "^(config/.*)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
