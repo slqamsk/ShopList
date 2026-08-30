@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация — ShopList</title>
+    <link rel="stylesheet" href="/pr/assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Регистрация</h1>
+        <form id="register-form">
+            <input type="text" id="username" placeholder="Имя пользователя" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <p>Уже есть аккаунт? <a href="login.html">Войти</a></p>
+        <div id="error" class="error"></div>
+    </div>
+    <script type="module">
+        import { apiRequest } from '/pr/assets/js/api-client.js';
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                const data = await apiRequest('register/', 'POST', { username, email, password });
+                if (data.success) {
+                    window.location.href = 'login.html';
+                }
+            } catch (err) {
+                document.getElementById('error').textContent = err.message;
+            }
+        });
+    </script>
+</body>
+</html>
